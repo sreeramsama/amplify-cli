@@ -1,10 +1,11 @@
-import { Unauthorized, ValidateError, TemplateSentError } from './errors';
 import { v4 as autoId } from 'uuid';
+import jsStringEscape from 'js-string-escape';
+import { GraphQLResolveInfo, FieldNode } from 'graphql';
+import { ulid } from 'ulid';
+import { Unauthorized, ValidateError, TemplateSentError } from './errors';
 import { JavaString } from '../value-mapper/string';
 import { JavaArray } from '../value-mapper/array';
 import { JavaMap } from '../value-mapper/map';
-import jsStringEscape from 'js-string-escape';
-import { GraphQLResolveInfo, FieldNode } from 'graphql';
 
 export const generalUtils = {
   errors: [],
@@ -15,9 +16,7 @@ export const generalUtils = {
   },
   urlEncode(value) {
     // Stringent in adhering to RFC 3986 ( except the asterisk that appsync ingores to encode )
-    return encodeURIComponent(value).replace(/[!'()]/g, function (c) {
-      return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-    });
+    return encodeURIComponent(value).replace(/[!'()]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
   },
   urlDecode(value) {
     return decodeURIComponent(value);
@@ -39,6 +38,7 @@ export const generalUtils = {
   autoId() {
     return autoId();
   },
+  autoUlid: () => ulid(),
   unauthorized() {
     const err = new Unauthorized('Unauthorized', this.info);
     this.errors.push(err);
@@ -65,16 +65,16 @@ export const generalUtils = {
     throw error;
   },
   isNull(value) {
-    return value === null || typeof value == 'undefined';
+    return value === null || typeof value === 'undefined';
   },
   isNullOrEmpty(value) {
     if (this.isNull(value)) return true;
 
     if (value instanceof JavaMap) {
-      return Object.keys(value.toJSON()).length == 0;
+      return Object.keys(value.toJSON()).length === 0;
     }
     if (value instanceof JavaArray || value instanceof JavaString) {
-      return value.toJSON().length == 0;
+      return value.toJSON().length === 0;
     }
     return !!value;
   },
@@ -132,7 +132,7 @@ export const generalUtils = {
 
 function filterData(info: GraphQLResolveInfo, data = null): any {
   if (data instanceof JavaMap) {
-    var filteredData = {};
+    const filteredData = {};
     // filter fields in data based on the query selection set
     info.operation.selectionSet.selections
       .map(selection => selection as FieldNode)
