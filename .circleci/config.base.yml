@@ -207,7 +207,7 @@ jobs:
             yarn yarn-use-bash
             yarn pkg-release-required
             unsetNpmRegistryUrl
-            uploadNonTestReleaseCli
+            uploadReleasePkgCli
       - save_cache:
           key: amplify-pkg-binaries-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -559,8 +559,7 @@ jobs:
           name: Upload Pkg Binary
           command: |
             source .circleci/local_publish_helpers.sh
-            uploadTestPkgCli
-            uploadNonTestReleaseCli
+            uploadReleasePkgCli
             ./out/amplify-pkg-linux-x64 --version
       - run:
           name: Authenticate with npm

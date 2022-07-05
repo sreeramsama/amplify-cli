@@ -44,7 +44,7 @@ function uploadTestPkgCli {
     cd ..
 }
 
-function uploadNonTestReleaseCli {
+function uploadReleasePkgCli {
     aws configure --profile=s3-uploader set aws_access_key_id $S3_ACCESS_KEY
     aws configure --profile=s3-uploader set aws_secret_access_key $S3_SECRET_ACCESS_KEY
     aws configure --profile=s3-uploader set aws_session_token $S3_AWS_SESSION_TOKEN
