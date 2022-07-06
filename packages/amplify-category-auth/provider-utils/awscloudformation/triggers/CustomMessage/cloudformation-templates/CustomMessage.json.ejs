@@ -76,25 +76,6 @@
           },
           "Properties": {
             "Handler": "index.handler",
-            "FunctionName": {
-                "Fn::If": [
-                    "ShouldNotCreateEnvResources",
-                    "<%= props.functionName %>",
-                    {
-
-                        "Fn::Join": [
-                            "",
-                            [
-                                "<%= props.functionName %>",
-                                "-",
-                                {
-                                    "Ref": "env"
-                                }
-                            ]
-                        ]
-                    }
-                ]
-            },
             "Environment": {
                 "Variables" : {
                     "ENV": {
@@ -128,25 +109,6 @@
         "LambdaExecutionRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
-                "RoleName": {
-                    "Fn::If": [
-                        "ShouldNotCreateEnvResources",
-                        "<%=props.roleName %>",
-                        {
-
-                            "Fn::Join": [
-                                "",
-                                [
-                                    "<%=props.roleName %>",
-                                    "-",
-                                    {
-                                        "Ref": "env"
-                                    }
-                                ]
-                            ]
-                        }
-                    ]
-                },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
