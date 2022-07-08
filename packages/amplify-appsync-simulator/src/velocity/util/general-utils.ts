@@ -5,6 +5,7 @@ import { JavaArray } from '../value-mapper/array';
 import { JavaMap } from '../value-mapper/map';
 import jsStringEscape from 'js-string-escape';
 import { GraphQLResolveInfo, FieldNode } from 'graphql';
+import { JavaInteger } from '../value-mapper/integer';
 
 export const generalUtils = {
   errors: [],
@@ -75,6 +76,9 @@ export const generalUtils = {
     }
     if (value instanceof JavaArray || value instanceof JavaString) {
       return value.toJSON().length == 0;
+    }
+    if (value instanceof JavaInteger) {
+      return this.isNull(value?.value)
     }
     return !!value;
   },
