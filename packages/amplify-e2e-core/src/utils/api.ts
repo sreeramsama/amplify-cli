@@ -32,7 +32,7 @@ export function writeToCustomResourcesJson(projectDir: string, apiName: string, 
 
 export function setTransformerVersionFlag(cwd: string, transformerVersion: number) {
   if (transformerVersion === 1) {
-    addFeatureFlag(cwd, 'graphqltransformer', 'transformerVersion', 1);
-    addFeatureFlag(cwd, 'graphqltransformer', 'useExperimentalPipelinedTransformer', false);
+    addFeatureFlag(cwd, 'graphqltransformer', 'transformerversion', 1);
+    addFeatureFlag(cwd, 'graphqltransformer', 'useexperimentalpipelinedtransformer', false);
   }
 }
