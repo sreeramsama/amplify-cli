@@ -724,7 +724,6 @@ workflows:
                 - /release_rc\/.*/
                 - /run-e2e-with-rc\/.*/
                 - /tagged-release\/.*/
-                - /tagged-release-without-e2e-tests\/.*/
                 - /run-e2e\/.*/
           requires:
             - build
@@ -902,6 +901,7 @@ workflows:
             - amplify_migration_tests_non_multi_env_layers
             - amplify_migration_tests_multi_env_layers
             - github_prerelease_install_sanity_check
+            - build_pkg_binaries
           filters:
             branches:
               only:
