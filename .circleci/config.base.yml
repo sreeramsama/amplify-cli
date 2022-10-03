@@ -724,6 +724,7 @@ workflows:
                 - /release_rc\/.*/
                 - /run-e2e-with-rc\/.*/
                 - /tagged-release\/.*/
+                - /tagged-release-without-e2e-tests\/.*/
                 - /run-e2e\/.*/
           requires:
             - build
