@@ -2,14 +2,14 @@ import { $TSContext } from 'amplify-cli-core';
 import { v4 as uuid } from 'uuid';
 import { merge } from 'lodash';
 import {
-  prompter, alphanumeric, and, minLength, maxLength, Validator, byValues,
+  prompter, alphanumeric, and, minLength, maxLength, Validator, byValues, printer,
 } from 'amplify-prompts';
 import { DeviceLocationTrackingParameters } from '../service-utils/deviceLocationTrackingParams';
 import { AccessType } from '../service-utils/resourceParams';
 import { ServiceName } from '../service-utils/constants';
 import { resourceAccessWalkthrough, defaultResourceQuestion } from './resourceWalkthrough';
-import { getGeoServiceMeta } from '../service-utils/resourceUtils';
-import { deviceLocationTrackingCrudPermissionsMap } from '../service-utils/deviceLocationTrackingConstants';
+import { checkGeoResourceTypeExists, getGeoServiceMeta, getGeoResourcesByServiceType } from '../service-utils/resourceUtils';
+import { deviceLocationTrackingAdvancedSettings, deviceLocationTrackingCrudPermissionsMap } from '../service-utils/deviceLocationTrackingConstants';
 
 /**
  * Starting point for CLI walkthrough that creates a device location tracking resource
@@ -28,7 +28,7 @@ export const createDeviceLocationTrackingWalkthrough = async (
   updatedParameters = merge(parameters, await deviceLocationTrackerAccessWalkthrough(context, updatedParameters));
 
   // optional advanced walkthrough
-  // updatedParameters = merge(parameters, await deviceLocationTrackerAdvancedWalkthrough(context, updatedParameters));
+  updatedParameters = merge(parameters, await deviceLocationTrackerAdvancedWalkthrough(context, updatedParameters));
 
   const currentDeviceLocationTrackerResources = await getGeoServiceMeta(ServiceName.DeviceLocationTracking);
   if (currentDeviceLocationTrackerResources && Object.keys(currentDeviceLocationTrackerResources).length > 0) {
@@ -111,3 +111,64 @@ export const deviceLocationTrackerAccessWalkthrough = async (
   updatedParameters.roleAndGroupPermissionsMap = selectedGroupPermissions;
   return updatedParameters;
 };
+
+const deviceLocationTrackerAdvancedWalkthrough = async (
+  context: $TSContext,
+  parameters: Partial<DeviceLocationTrackingParameters>,
+): Promise<Partial<DeviceLocationTrackingParameters>> => {
+  let updatedParameters = { ...parameters };
+  const selectedAdvancedSetting = await prompter.pick<'one', string>(
+    `Here are the default advanced settings. Select a setting to edit or continue (Use arrow keys)`,
+    Object.values(deviceLocationTrackingAdvancedSettings),
+    { returnSize: 'one' },
+  );
+  switch (selectedAdvancedSetting) {
+    // Grant users access to devices other than their own
+    case deviceLocationTrackingAdvancedSettings.grantOtherAccess:
+      // updatedParameters = merge(updatedParameters, await deviceLocationTrackerOtherAccessWalkthrough(updatedParameters));
+      break;
+    // Link Geofence Collection Question
+    case deviceLocationTrackingAdvancedSettings.linkGeofenceCollection:
+      updatedParameters = merge(updatedParameters, await deviceLocationTrackerGeofenceLinkingWalkthrough(updatedParameters));
+      break;
+    // KMS Settings
+    case deviceLocationTrackingAdvancedSettings.addKMSSettings:
+      // updatedParameters = merge(updatedParameters, await deviceLocationTrackerKMSSettingsWalkthrough(updatedParameters));
+      break;
+    // Position filtering method settings
+    case deviceLocationTrackingAdvancedSettings.setPositionFilteringMethod:
+      // updatedParameters = merge(updatedParameters, await deviceLocationTrackerFilteringMethodWalkthrough(updatedParameters));
+      break;
+    default:
+      printer.error('something went wrong...');
+  }
+  return updatedParameters;
+};
+
+// const deviceLocationTrackerOtherAccessWalkthrough = async (parameters: Partial<DeviceLocationTrackingParameters>): Promise<> => {
+// };
+
+const deviceLocationTrackerGeofenceLinkingWalkthrough = async (
+  parameters: Partial<DeviceLocationTrackingParameters>,
+): Promise<Partial<DeviceLocationTrackingParameters>> => {
+  const updatedParameters = { ...parameters };
+
+  const isExists = await checkGeoResourceTypeExists(ServiceName.GeofenceCollection);
+  if (isExists) {
+    if (await prompter.yesOrNo('Do you want to link a geofence collection to this tracker?', false)) {
+      const selectedGeofenceCollections = await prompter.pick<'many', string>(
+        `Select the geofence collections you want to link to this tracker`,
+        await getGeoResourcesByServiceType(ServiceName.GeofenceCollection),
+        { returnSize: 'many', pickAtLeast: 1 },
+      );
+      updatedParameters.linkedGeofenceCollections = selectedGeofenceCollections;
+    }
+  }
+  return updatedParameters;
+};
+
+// const deviceLocationTrackerKMSSettingsWalkthrough = async (parameters: Partial<DeviceLocationTrackingParameters>): Promise<> => {
+// };
+
+// const deviceLocationTrackerFilteringMethodWalkthrough = async (parameters: Partial<DeviceLocationTrackingParameters>): Promise<> => {
+// };
